@@ -57,11 +57,14 @@ clash_started = False
 # main loop
 while(run):
     if not em_started:
-        if os.path.exists('C:\\Program Files (x86)\\Microvirt\\MEmu'):
+        if os.path.exists('C:\\Program Files (x86)\\Microvirt\\MEmu\\MEmu.exe'):
             start_em()
             em_started = True
         else:
             print('You need to download MEmu')
+            print('You can download EMmu at: https://www.memuplay.com/')
+            print('or the path is not right should look like')
+            print('C:\Program Files (x86)\Microvirt\MEmu\MEmu.exe')
             break
     
     if not clash_started:
