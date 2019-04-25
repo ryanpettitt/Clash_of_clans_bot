@@ -2,6 +2,7 @@ import numpy as np
 import grab_screen, os, pyautogui, cv2, time, io
 from PIL import ImageGrab, Image
 import pygetwindow as gw
+import matplotlib.pyplot as plt
 
 #this is for testing and finding where the pointer is on screen
 def get_position():
@@ -33,8 +34,10 @@ def start_clash():
 
 # edge detection
 def process_img(original_image):
-    processed_img = cv2.cvtColor(original_image, cv2.COLOR_BGR2GRAY)
-    processed_img = cv2.Canny(processed_img, threshold1=100, threshold2=400)
+    processed_img = cv2.cvtColor(original_image, cv2.findContours)
+    
+    # bringing threshold2 closer to threshold1 will get more detail and a lot more noise 
+    processed_img = cv2.Canny(processed_img, threshold1=240, threshold2=360)
     return processed_img
 
 # opens a window showing the edge detection
@@ -42,6 +45,7 @@ def screen():
     screen = np.array(ImageGrab.grab(bbox=(0,40,850,520)))
     new_screen = process_img(screen)
     cv2.imshow('window', new_screen)
+    
     #cv2.imshow('window', cv2.cvtColor(screen, cv2.COLOR_BGR2RGB))
     if cv2.waitKey(25) & 0xFF == ord('q'):
         cv2.destroyAllWindows()
