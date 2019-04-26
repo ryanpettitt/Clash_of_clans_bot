@@ -4,6 +4,10 @@ from PIL import ImageGrab, Image
 import pygetwindow as gw
 import matplotlib.pyplot as plt
 
+archertower = 'training.PNG'
+armytrain = 'armytrain.PNG'
+goldstorage = 'Goldstroage.PNG'
+
 #this is for testing and finding where the pointer is on screen
 def get_position():
     for i in range(4):
@@ -13,8 +17,8 @@ def get_position():
 
 #starts the emulator
 def start_em():
-    os.startfile('C:\\Program Files (x86)\\Microvirt\\MEmu\\MEmu.exe')
-    time.sleep(15)
+    #os.startfile('C:\\Program Files (x86)\\Microvirt\\MEmu\\MEmu.exe')
+    #time.sleep(25)
     memu = gw.getWindowsWithTitle('MEmu')[0]
     # Has an add portion with the same name
     if len(gw.getWindowsWithTitle('MEmu')) == 2:
@@ -34,16 +38,37 @@ def start_clash():
 
 # edge detection
 def process_img(original_image):
-    processed_img = cv2.cvtColor(original_image, cv2.findContours)
-    
-    # bringing threshold2 closer to threshold1 will get more detail and a lot more noise 
-    processed_img = cv2.Canny(processed_img, threshold1=240, threshold2=360)
-    return processed_img
+    hsv = cv2.cvtColor(original_image, cv2.COLOR_BGR2HSV)
+
+    lower_red = np.array([0,100,100])
+    upper_red = np.array([100,190,200])
+
+    mask = cv2.inRange(hsv, lower_red, upper_red)
+    resualt = cv2.bitwise_and(original_image, original_image, mask=mask)
+    return resualt
+
+#finds the objects
+def img_detect(img, imgtofind):
+    img_rgb = img
+    img_gray = cv2.cvtColor(img_rgb, cv2.COLOR_BGR2GRAY)
+
+    template = cv2.imread(imgtofind,0)
+    w, h = template.shape[::-1]
+    res = cv2.matchTemplate(img_gray,template,cv2.TM_CCOEFF_NORMED)
+    threshold = 0.62
+    loc = np.where( res >= threshold)
+    for pt in zip(*loc[::-1]):
+        cv2.rectangle(img_rgb, pt, (pt[0] + w, pt[1] + h), (0,255,255), 2)
+    return img_rgb
+
 
 # opens a window showing the edge detection
 def screen():
     screen = np.array(ImageGrab.grab(bbox=(0,40,850,520)))
-    new_screen = process_img(screen)
+    new_screen = img_detect(screen, archertower)
+    new_screen = img_detect(new_screen, armytrain)
+    new_screen = img_detect(new_screen, goldstorage)
+
     cv2.imshow('window', new_screen)
     
     #cv2.imshow('window', cv2.cvtColor(screen, cv2.COLOR_BGR2RGB))
@@ -72,7 +97,7 @@ while(run):
             break
     
     if not clash_started:
-        start_clash()
+        #start_clash()
         clash_started = True
     
     screen()
